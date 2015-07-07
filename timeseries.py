@@ -2,7 +2,8 @@ import sys
 import os
 from datetime import datetime
 from datetime import timedelta
-import numpy
+import numpy 
+import pandas as pd
 
 class Timeseries:
 	series = {}
@@ -15,15 +16,15 @@ class Timeseries:
 		data = {}
 		for line in lines:
 			parts = line.strip().split(',')
-			t = datetime.fromtimestamp(float(parts[0].strip())) - offset
+			t = datetime.fromtimestamp(float(parts[0].strip()) - offset ) 
 			v = float(parts[1].strip())
 			data[t] = v
-
+		self.bucket = bucketSize
 		self.original_ts = pd.Series(data)
 		self.resampled_ts = self.resample( self.bucket )
 		
 	def resample(self, bucket):
-		newts = self.original_ts.resample(str(bucket) + 'min', how=np.mean)
+		newts = self.original_ts.resample(str(bucket) + 'min', how=numpy.mean)
 		resampled_ts = newts.interpolate()
 		return resampled_ts
 	
@@ -31,6 +32,9 @@ class Timeseries:
 		if index not in self.periods:
 			self.periods[index] = []
 		self.periods[index].append( (startDate, endDate ) )
+
+	def addAllPeriods( self, periods ):
+		self.periods = periods.copy()
 
 	def getBucket(self):
 		return self.bucket
@@ -47,8 +51,8 @@ class Timeseries:
 		returnData = {}
 		indices = self.resampled_ts.index
 		for i in range(len(self.periods[periodNum])):
-			startTime = self.periods[periodNum][0]
-			endTime = self.periods[periodNum][1]
+			startTime = self.periods[periodNum][i][0]
+			endTime = self.periods[periodNum][i][1]
 			result = {}
 			for j in range(len(indices)):
 				t = indices[j].to_datetime()
@@ -78,8 +82,16 @@ class Timeseries:
 			Put a check in place to see whether you have a full day of data
 			'''
 			if len(valuesByDay[day]) != ( 24 * 60 ) / self.bucket :
+				print "length of series only : ", len(valuesByDay[day])
 				continue
 			resultsByDay[day] = ( numpy.mean(valuesByDay[day]) , numpy.std(valuesByDay[day]) )
 
 		return resultsByDay
-		
+	'''
+	Returns overall mean and std over period 
+	'''
+	def getMean( self, periodNum ):
+		data = self.filterPeriod( periodNum )
+		values = [ data[t] for t in data ]
+		return ( numpy.mean(values) , numpy.std(values) )
+

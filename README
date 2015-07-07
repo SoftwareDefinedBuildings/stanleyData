@@ -1,4 +1,4 @@
 python createMetadataFile.py -> creates Metadata file for stanley . It is a dict which contains the relevant sensor names for each room
 python getData.py <name_of_directory_to_store_data> -> pulls the data in from sMAP for the relevant sensors into individual files and stores them in desired directory
-
+python simplePlot.py <params> -> simple scatter plot which plots cold_day - hot_day of reheat and flow 
 
