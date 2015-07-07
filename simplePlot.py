@@ -92,7 +92,7 @@ def runExp( ahumapping, metadata, dataDir, outputfilename ):
 		count += 1
 		try:
 			print >> sys.stderr, "Doing room : ", room , "(%d/%d)" % (count,len(metadata))
-			ret = calcStats( room , "../data" , metadata )
+			ret = calcStats( room , dataDir , metadata )
 			if ret == None:
 				continue
 			(x1, y1) = ret
@@ -107,7 +107,9 @@ def runExp( ahumapping, metadata, dataDir, outputfilename ):
 		xs = [ a for (a,b) in scatterPoints[i] ]
 		ys = [ b for (a,b) in scatterPoints[i] ]
 		ax.scatter( xs, ys, c=colors[i] , label = 'ahu-' + str(i))
-		
+
+	ax.set_xlabel("Reheat diff")	
+	ax.set_ylabel("Flow diff")	
 	plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=5, mode="expand", borderaxespad=0.)
 	plt.savefig(outputfilename + ".png", dpi=300 )
 
