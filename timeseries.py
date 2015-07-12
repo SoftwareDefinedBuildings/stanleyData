@@ -16,13 +16,16 @@ class Timeseries:
 		data = {}
 		for line in lines:
 			parts = line.strip().split(',')
-			t = datetime.fromtimestamp(float(parts[0].strip()) - offset ) 
+			if "nan" in lines:
+				continue
+			t = datetime.fromtimestamp(float(parts[0].strip()) - offset  ) 
 			v = float(parts[1].strip())
 			data[t] = v
 		self.bucket = bucketSize
 		self.original_ts = pd.Series(data)
 		self.resampled_ts = self.resample( self.bucket )
-		
+		self.name = name
+	
 	def resample(self, bucket):
 		newts = self.original_ts.resample(str(bucket) + 'min', how=numpy.mean)
 		resampled_ts = newts.interpolate()
@@ -44,7 +47,7 @@ class Timeseries:
 		self.resampled_ts = self.resample( self.bucket )
 
 	'''
-	Returns a dict with required values
+	Returns a dictionary with required values
 	'''
 
 	def filterPeriod( self, periodNum ) :
@@ -58,11 +61,19 @@ class Timeseries:
 				t = indices[j].to_datetime()
 				if t < startTime or t > endTime:
 					continue
+				if t.hour >= 22 :
+					continue
 				result[t] = self.resampled_ts[j]
 
 			returnData.update(result)
 
 		return returnData
+
+
+
+	'''
+		Returns centroid and 90% confidence interval for each day 
+	'''
 
 	'''
 	Returns mean, std for each day over a period
@@ -95,3 +106,4 @@ class Timeseries:
 		values = [ data[t] for t in data ]
 		return ( numpy.mean(values) , numpy.std(values) )
 
+	
